@@ -1,9 +1,8 @@
 package io.github.junrock.lunisolar
 
 import java.time.LocalDate
-import java.util.Collections
 
-/** [LunarYearData] 를 풀어 해마다 달 목록과 양력 시작일을 계산해 둠 */
+/** [LunarYearData] 를 풀어 만든 음력 해 목록 — 어느 해를 볼지 찾아 주는 역할 */
 internal object LunarTable {
     private const val BASE_YEAR = 1900
     private const val BIG_MONTH_DAYS = 30
@@ -13,32 +12,30 @@ internal object LunarTable {
     private const val FOUR_BITS = 0xF
 
     /** 음력 1900년 1월 1일의 양력 날짜 */
-    val BASE_EPOCH_DAY: Long = LocalDate.of(1900, 1, 31).toEpochDay()
+    val FIRST_EPOCH_DAY: Long = LocalDate.of(1900, 1, 31).toEpochDay()
 
-    // 밖에서 표를 바꾸지 못하게 읽기 전용으로 감쌈
-    private val months: List<List<LunarMonth>> = LunarYearData.YEARS.map { Collections.unmodifiableList(decode(it)) }
-
-    /** 표에 든 마지막 음력 달의 말일 (음력 2050년 11월 30일) */
-    val MAX_EPOCH_DAY: Long = BASE_EPOCH_DAY + months.sumOf { year -> year.sumOf { it.days } } - 1
-
-    private val yearStarts: LongArray =
-        LongArray(months.size).also { starts ->
-            var epochDay = BASE_EPOCH_DAY
-            months.forEachIndexed { index, yearMonths ->
-                starts[index] = epochDay
-                epochDay += yearMonths.sumOf { it.days }
+    private val years: List<LunarYear> =
+        buildList {
+            var startEpochDay = FIRST_EPOCH_DAY
+            LunarYearData.YEARS.forEachIndexed { index, packed ->
+                add(LunarYear(BASE_YEAR + index, decode(packed), startEpochDay))
+                startEpochDay += last().days
             }
         }
 
-    fun monthsOf(year: Int): List<LunarMonth>? = months.getOrNull(year - BASE_YEAR)
+    private val yearStarts: LongArray = LongArray(years.size) { years[it].startEpochDay }
 
-    fun yearStart(year: Int): Long = yearStarts[year - BASE_YEAR]
+    /** 표에 든 마지막 음력 달의 말일 (음력 2050년 11월 30일) */
+    val LAST_EPOCH_DAY: Long = years.last().let { it.startEpochDay + it.days - 1 }
 
-    /** 그 양력 날짜가 속한 음력 해 — 호출 전에 지원 범위 안인지 확인해야 함 */
-    fun yearContaining(epochDay: Long): Int {
+    /** 그 음력 해. 지원 범위 밖이면 null */
+    fun yearOf(year: Int): LunarYear? = years.getOrNull(year - BASE_YEAR)
+
+    /** 그 양력 날짜가 속한 음력 해. 지원 범위 밖이면 null */
+    fun yearContaining(epochDay: Long): LunarYear? {
+        if (epochDay !in FIRST_EPOCH_DAY..LAST_EPOCH_DAY) return null
         val found = yearStarts.binarySearch(epochDay)
-        val index = if (found >= 0) found else -found - 2
-        return BASE_YEAR + index
+        return years[if (found >= 0) found else -found - 2]
     }
 
     /**
