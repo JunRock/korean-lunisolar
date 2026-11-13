@@ -4,7 +4,9 @@ import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class KoreanLunisolarTest {
     private data class OfficialMonth(
@@ -89,5 +91,18 @@ class KoreanLunisolarTest {
         assertNull(KoreanLunisolar.toLunarOrNull(KoreanLunisolar.MIN_SOLAR.minusDays(1)))
         assertNull(KoreanLunisolar.toLunarOrNull(KoreanLunisolar.MAX_SOLAR.plusDays(1)))
         assertFailsWith<IllegalArgumentException> { KoreanLunisolar.toSolar(2026, 2, 31) }
+    }
+
+    @Test
+    fun `있는 날짜인지는 변환할 수 있는지와 같다`() {
+        officialMonths.forEach { month ->
+            assertTrue(KoreanLunisolar.isValidLunarDate(month.year, month.month, month.days, month.isLeap))
+            assertFalse(KoreanLunisolar.isValidLunarDate(month.year, month.month, month.days + 1, month.isLeap))
+            assertFalse(KoreanLunisolar.isValidLunarDate(month.year, month.month, 0, month.isLeap))
+        }
+        assertFalse(KoreanLunisolar.isValidLunarDate(2026, 1, 1, isLeapMonth = true))
+        assertFalse(KoreanLunisolar.isValidLunarDate(2026, 13, 1))
+        assertFalse(KoreanLunisolar.isValidLunarDate(1899, 12, 1))
+        assertFalse(KoreanLunisolar.isValidLunarDate(2051, 1, 1))
     }
 }

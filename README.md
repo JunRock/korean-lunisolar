@@ -11,7 +11,7 @@
 
 ```kotlin
 dependencies {
-    implementation("io.github.junrock:korean-lunisolar:0.0.1")
+    implementation("io.github.junrock:korean-lunisolar:0.0.2")
 }
 ```
 
@@ -33,6 +33,10 @@ KoreanLunisolar.toLunar(LocalDate.of(2026, 11, 9))         // 음력 2026년 10�
 
 // 없는 날짜나 지원 범위 밖이면 예외 대신 null
 KoreanLunisolar.toSolarOrNull(2026, 2, 31)                 // null
+
+// 있는 음력 날짜인지 (그 달에 없는 날, 없는 윤달, 범위 밖이면 false)
+KoreanLunisolar.isValidLunarDate(2026, 10, 30)             // true
+KoreanLunisolar.isValidLunarDate(2026, 2, 31)              // false
 
 // 그 음력 달의 날수 (29 또는 30)
 KoreanLunisolar.daysInMonth(2026, 10)                      // 30

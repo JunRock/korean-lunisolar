@@ -12,7 +12,7 @@ plugins {
 val repoUrl = "https://github.com/JunRock/korean-lunisolar"
 
 group = "io.github.junrock"
-version = "0.0.1"
+version = "0.0.2"
 
 repositories { mavenCentral() }
 

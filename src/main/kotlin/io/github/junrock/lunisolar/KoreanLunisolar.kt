@@ -48,6 +48,16 @@ object KoreanLunisolar {
         isLeapMonth: Boolean = false,
     ): LocalDate? = LunarTable.yearOf(year)?.epochDayOf(month, day, isLeapMonth)?.let(LocalDate::ofEpochDay)
 
+    /** 있는 음력 날짜인지. 그 달에 없는 날(29일짜리 달의 30일 등), 없는 윤달, 지원 범위 밖이면 false */
+    @JvmStatic
+    @JvmOverloads
+    fun isValidLunarDate(
+        year: Int,
+        month: Int,
+        day: Int,
+        isLeapMonth: Boolean = false,
+    ): Boolean = toSolarOrNull(year, month, day, isLeapMonth) != null
+
     /**
      * 양력 → 음력
      *
