@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     kotlin("jvm") version "2.2.20"
@@ -22,8 +23,13 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
         freeCompilerArgs.add("-Xjdk-release=17")
+        // Kotlin 2.0 이상을 쓰는 프로젝트에서도 불러 쓸 수 있게 낮춤
+        apiVersion.set(KotlinVersion.KOTLIN_2_0)
+        languageVersion.set(KotlinVersion.KOTLIN_2_0)
     }
+    coreLibrariesVersion = "2.0.21"
 }
+tasks.jar { manifest { attributes("Automatic-Module-Name" to "io.github.junrock.lunisolar") } }
 tasks.withType<JavaCompile> { options.release.set(17) }
 
 ktlint { version.set("1.5.0") }
