@@ -47,6 +47,24 @@ class KoreanLunisolarTest {
     }
 
     @Test
+    fun `지원 범위의 처음과 끝이 정해진 날짜다`() {
+        assertEquals(1867, officialMonths.size)
+        assertEquals(LocalDate.of(1900, 1, 31), KoreanLunisolar.MIN_SOLAR)
+        assertEquals(LocalDate.of(2051, 1, 12), KoreanLunisolar.MAX_SOLAR)
+        assertEquals(LunarDate(1900, 1, 1), KoreanLunisolar.toLunar(LocalDate.of(1900, 1, 31)))
+        assertEquals(LunarDate(2050, 11, 30), KoreanLunisolar.toLunar(LocalDate.of(2051, 1, 12)))
+        assertEquals(LocalDate.of(2051, 1, 12), KoreanLunisolar.toSolarOrNull(2050, 11, 30))
+        // 표의 마지막 달도 날수만큼 전부 바꿀 수 있어야 함
+        assertEquals(LocalDate.of(2050, 12, 31), KoreanLunisolar.toSolarOrNull(2050, 11, 18))
+        assertNull(KoreanLunisolar.toSolarOrNull(2050, 12, 1))
+        assertNull(KoreanLunisolar.daysInMonth(2050, 12))
+        assertNull(KoreanLunisolar.toLunarOrNull(LocalDate.of(2051, 1, 13)))
+        assertNull(KoreanLunisolar.toLunarOrNull(LocalDate.of(1900, 1, 30)))
+        assertNull(KoreanLunisolar.toLunarOrNull(LocalDate.MAX))
+        assertNull(KoreanLunisolar.toLunarOrNull(LocalDate.MIN))
+    }
+
+    @Test
     fun `알려진 날짜를 맞게 바꾼다`() {
         // 설날 — 2027·2028년은 한국과 중국이 하루 다른 해
         assertEquals(LocalDate.of(2026, 2, 17), KoreanLunisolar.toSolar(2026, 1, 1))

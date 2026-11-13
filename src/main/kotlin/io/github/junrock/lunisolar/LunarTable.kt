@@ -1,6 +1,7 @@
 package io.github.junrock.lunisolar
 
 import java.time.LocalDate
+import java.util.Collections
 
 /** [LunarYearData] 를 풀어 해마다 달 목록과 양력 시작일을 계산해 둠 */
 internal object LunarTable {
@@ -14,10 +15,11 @@ internal object LunarTable {
     /** 음력 1900년 1월 1일의 양력 날짜 */
     val BASE_EPOCH_DAY: Long = LocalDate.of(1900, 1, 31).toEpochDay()
 
-    /** 한국천문연구원 자료가 제공되는 마지막 양력 날짜 */
-    val MAX_EPOCH_DAY: Long = LocalDate.of(2050, 12, 31).toEpochDay()
+    // 밖에서 표를 바꾸지 못하게 읽기 전용으로 감쌈
+    private val months: List<List<LunarMonth>> = LunarYearData.YEARS.map { Collections.unmodifiableList(decode(it)) }
 
-    private val months: List<List<LunarMonth>> = LunarYearData.YEARS.map(::decode)
+    /** 표에 든 마지막 음력 달의 말일 (음력 2050년 11월 30일) */
+    val MAX_EPOCH_DAY: Long = BASE_EPOCH_DAY + months.sumOf { year -> year.sumOf { it.days } } - 1
 
     private val yearStarts: LongArray =
         LongArray(months.size).also { starts ->

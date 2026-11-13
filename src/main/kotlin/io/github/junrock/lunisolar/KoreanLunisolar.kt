@@ -6,14 +6,15 @@ import java.time.LocalDate
  * 한국 음력(태음태양력) <-> 양력 변환
  *
  * 한국천문연구원 음양력 자료로 만든 표를 내장 → 네트워크 없이 계산
- * 지원 범위는 [MIN_SOLAR] ~ [MAX_SOLAR]
+ * 지원 범위는 [MIN_SOLAR] ~ [MAX_SOLAR] (음력 1900년 1월 1일 ~ 2050년 11월 30일)
+ * 범위 밖의 해·달·날짜를 물으면 OrNull 함수와 [daysInMonth], [leapMonth] 는 null 을 돌려줌
  */
 object KoreanLunisolar {
     /** 변환할 수 있는 가장 이른 양력 날짜 (음력 1900년 1월 1일) */
     @JvmField
     val MIN_SOLAR: LocalDate = LocalDate.ofEpochDay(LunarTable.BASE_EPOCH_DAY)
 
-    /** 변환할 수 있는 가장 늦은 양력 날짜 */
+    /** 변환할 수 있는 가장 늦은 양력 날짜 (음력 2050년 11월 30일) */
     @JvmField
     val MAX_SOLAR: LocalDate = LocalDate.ofEpochDay(LunarTable.MAX_EPOCH_DAY)
 
@@ -49,8 +50,7 @@ object KoreanLunisolar {
         val months = LunarTable.monthsOf(year) ?: return null
         val index = months.indexOfFirst { it.month == month && it.isLeap == isLeapMonth }
         if (index < 0 || day !in 1..months[index].days) return null
-        val epochDay = LunarTable.yearStart(year) + months.take(index).sumOf { it.days } + (day - 1)
-        return if (epochDay > LunarTable.MAX_EPOCH_DAY) null else LocalDate.ofEpochDay(epochDay)
+        return LocalDate.ofEpochDay(LunarTable.yearStart(year) + months.take(index).sumOf { it.days } + (day - 1))
     }
 
     /**
@@ -77,7 +77,7 @@ object KoreanLunisolar {
         return null
     }
 
-    /** 그 음력 달의 날수(29 또는 30). 없는 달이면 null */
+    /** 그 음력 달의 날수(29 또는 30). 없는 달이거나 지원 범위 밖이면 null */
     @JvmStatic
     @JvmOverloads
     fun daysInMonth(
@@ -86,7 +86,7 @@ object KoreanLunisolar {
         isLeapMonth: Boolean = false,
     ): Int? = LunarTable.monthsOf(year)?.firstOrNull { it.month == month && it.isLeap == isLeapMonth }?.days
 
-    /** 그 음력 해의 윤달이 몇 월 뒤에 오는지. 윤달이 없으면 null */
+    /** 그 음력 해의 윤달이 몇 월 뒤에 오는지. 윤달이 없거나 지원 범위 밖의 해면 null */
     @JvmStatic
     fun leapMonth(year: Int): Int? = LunarTable.monthsOf(year)?.firstOrNull { it.isLeap }?.month
 }

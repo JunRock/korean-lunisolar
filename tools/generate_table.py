@@ -26,6 +26,8 @@ for previous, current in zip(flat, flat[1:]):
     assert previous[2] + datetime.timedelta(days=previous[3]) == current[2], (previous, current)
 assert sorted(years) == list(range(1900, 2051)), "빠진 해가 있음"
 assert flat[0][2] == datetime.date(1900, 1, 31)
+# 마지막 달은 이어지는 달이 없어 위 검사에 안 걸림 → 값을 직접 확인 (응답이 비면 표가 조용히 짧아짐)
+assert len(flat) == 1867 and flat[-1] == (11, 0, datetime.date(2050, 12, 14), 30), flat[-1]
 
 lines = []
 for year in sorted(years):
